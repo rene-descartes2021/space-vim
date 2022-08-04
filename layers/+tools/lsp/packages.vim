@@ -17,4 +17,8 @@ elseif g:spacevim_lsp_engine ==# 'lcn'
     \ 'hook_post_update': function('spacevim#vim#plug#post_update',
     \   ['LanguageClient-neovim', 'bash install.sh']),
     \ }
+elseif g:spacevim_lsp_engine ==# 'nvim'
+  MP 'neovim/nvim-lspconfig'
+  MP 'williamboman/mason.nvim'
+  MP 'williamboman/mason-lspconfig.nvim'
 endif

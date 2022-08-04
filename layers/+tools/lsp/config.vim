@@ -230,4 +230,85 @@ function! s:whichkey_vim_lsp_integration_visual()
 endfunction
 " }
 
+" native Neovim LSP {
+function! s:nvim() abort
+  lua require("mason").setup()
+  lua require("mason-lspconfig").setup({ automatic_installation = true })
+
+  if spacevim#load('which-key')
+    let s:keep_keymap_normal = get(s:, 'keep_keymap_normal', deepcopy(g:spacevim#map#leader#desc['l']))
+    let g:spacevim#map#leader#desc['l'] = function('s:whichkey_nvim_integration')
+    let s:keep_keymap_visual = get(s:, 'keep_keymap_visual', has_key(g:spacevim#map#leader#desc_visual, 'l') ? deepcopy(g:spacevim#map#leader#desc_visual['l']): {})
+    let g:spacevim#map#leader#desc_visual['l'] = function('s:whichkey_nvim_integration_visual')
+  endif
+endfunction
+
+let B = function({ p -> 'lua vim.lsp.buf.'.p })
+let D = function({ p -> 'lua vim.diagnostic.'.p })
+
+function! s:whichkey_nvim_integration()
+  if get(b:, 'spacevim_lsp_engine', g:spacevim_lsp_engine) ==# 'nvim'
+    let s:new_keymap_normal = get(s:, 'new_keymap_normal', {
+    \ 'name': '+nvim',
+    \ 'a': [B('code_action')        , 'code-action'],
+    \ 'f': [B('formatting')         , 'formatting'],
+    \ 'h': [B('hover')              , 'hover'],
+    \ 'H': [B('signature_help')     , 'signature-help'],
+    \ 'r': [B('references')         , 'references'],
+    \ 'R': [B('rename')             , 'rename'],
+    \ 's': [B('document_symbol')    , 'document-symbol'],
+    \ 'S': [B('workspace_symbol')   , 'workspace-symbol'],
+    \ 'g': {
+      \ 'name': '+goto',
+      \ 'c': [B('declaration')      , 'declaration'],
+      \ 'd': [B('definition')       , 'definition'],
+      \ 't': [B('type_definition')  , 'type-definition'],
+      \ 'i': [B('implementation')   , 'implementation'],
+      \ },
+    \ 'O': {
+      \ 'name': '+hierarchy',
+      \ 'i': [B('incoming_calls'), 'call-hierarchy-in'],
+      \ 'o': [B('outgoing_calls'), 'call-hierarchy-out'],
+      \ },
+    \ 'd': {
+      \ 'name': '+diagnostic',
+      \ 'r': [D('open_float')       , 'document-diagnostics'],
+      \ 'd': [D('goto-next')        , 'next-diagnostic'],
+      \ 'D': [D('goto-prev')        , 'previous-diagnostic'],
+      \ 'q': [D('setloclist')       , 'setloclist'],
+      \ },
+    \ 'W': {
+      \ 'name': '+workspace',
+      \ 'a': [B('add_workspace_folder')     , 'add folder'],
+      \ 'r': [B('remove_workspace_folder')  , 'remove folder'],
+      \ 'l': [B('list_workspace_folders')   , 'list folders'],
+      \ },
+    \ 'X': {
+      \ 'name': '+server',
+      \ 's': [B('server_ready'), 'status'],
+      \ 'S': ['echom "how?"'       , 'start'],
+      \ 't': ['lua vim.lsp.stop_client(get_active_clients({bufnr: vim.bufnr()}))', 'stop'],
+      \ 'T': ['lua vim.lsp.stop_client(get_active_clients())', 'stop-all'],
+      \ },
+    \ })
+    return s:new_keymap_normal
+  else
+    return s:keep_keymap_normal
+  endif
+endfunction
+
+function! s:whichkey_nvim_integration_visual()
+  if get(b:, 'spacevim_lsp_engine', g:spacevim_lsp_engine) ==# 'nvim'
+    let s:new_keymap_visual = get(s:, 'new_keymap_visual', {
+    \ 'name': '+vim-lsp',
+    \ 'a': [B('range_code_action')        , 'code-action'],
+    \ 'F': [B('range_formatting')					, 'range-formatting'],
+    \ })
+    return s:new_keymap_visual
+  else
+    return s:keep_keymap_visual
+  endif
+endfunction
+" }
+
 call s:{g:spacevim_lsp_engine}()
